@@ -34,16 +34,28 @@ def stackImages(scale,imgArray):
 
 def getContours(img):
     contours,hierarchy = cv2.findContours(img,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+    print("sddsadasdafzzz",hierarchy)
     for cnt in contours:
         area = cv2.contourArea(cnt)
         print(area)
         if area > 500: # 불필요한 디텍팅 방지 (노이즈)
             cv2.drawContours(imgContour, cnt, -1, (255, 0, 0), 3) # (적용할 이미지, contour, 모두 그리기, 색깔, 선 굵기)
-            peri = cv2.arcLength(cnt,True) # 컨투어 둘레 True 일 때는 컨투어의 시작점과 끝점을 이어 도형을 구성하고 그 둘레 값을 계산한다. False인 경우 시작점과 끝점을 잇지 않고 둘레를 계산한다.
-            print(peri)
+            peri = cv2.arcLength(cnt,True)
+            # 컨투어 둘레 True 일 때는 컨투어의 시작점과 끝점을 이어 도형을 구성하고 그 둘레 값을 계산한다.
+            # False인 경우 시작점과 끝점을 잇지 않고 둘레를 계산한다.
+            #print(peri)
             approx = cv2.approxPolyDP(cnt,0.02*peri,True) # 꼭짓점 찾기, 컨투어 추정, 0.02: 근사치의 최대 거리
             print(len(approx)) # approx 개수로 모양 찾기
+            objCor = len(approx)
+            x, y, w, h = cv2.boundingRect(approx)
 
+
+
+
+            if objCor == 3:objectType = "Tri"
+            else:objectType = "None"
+            cv2.rectangle(imgContour, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.putText(imgContour,objectType,(x+(w//2)-10,y+(h//2)-10),cv2.FONT_HERSHEY_COMPLEX,0.7,(0,0,0),2)
 
 path = "Resources/shapes.png"
 img = cv2.imread(path)
@@ -56,7 +68,7 @@ imgCanny = cv2.Canny(imgBlur,50,50)
 getContours(imgCanny)
 
 imgBlank = np.zeros_like(img)
-imgStack = stackImages(0.6,([img,imgGray,imgBlur],[imgCanny,imgContour,imgBlank]))
+imgStack = stackImages(0.7,([img,imgGray,imgBlur],[imgCanny,imgContour,imgBlank]))
 
 
 
